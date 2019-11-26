@@ -4,18 +4,27 @@
 
 syntax = "proto3";
 
-option go_package = "github.com/hyperledger/fabric-protos-go/common";
-option java_package = "org.hyperledger.fabric.protos.common";
+option go_package = "github.com/hyperledger/fabric-protos-go/peer";
+option java_package = "org.hyperledger.fabric.protos.peer";
 
-package common;
+package protos;
 
 import "common/policies.proto";
+import "peer/policy.proto";
+
+// CollectionType enumerates the various types of private data collections.
+enum CollectionType {
+    COL_UNKNOWN   = 0;
+    COL_PRIVATE   = 1;
+    COL_TRANSIENT = 2;
+    COL_OFFLEDGER = 3;
+    COL_DCAS      = 4;
+}
 
 // CollectionConfigPackage represents an array of CollectionConfig
 // messages; the extra struct is required because repeated oneof is
 // forbidden by the protobuf syntax
 message CollectionConfigPackage {
-    option deprecated = true;
     repeated CollectionConfig config = 1;
 }
 
@@ -23,7 +32,6 @@ message CollectionConfigPackage {
 // it currently contains a single, static type.
 // Dynamic collections are deferred.
 message CollectionConfig {
-    option deprecated = true;
     oneof payload {
         StaticCollectionConfig static_collection_config = 1;
     }
@@ -35,7 +43,6 @@ message CollectionConfig {
 // known at chaincode instantiation time, and that cannot be changed.
 // Dynamic collections are deferred.
 message StaticCollectionConfig {
-    option deprecated = true;
     // the name of the collection inside the denoted chaincode
     string name = 1;
     // a reference to a policy residing / managed in the config block
@@ -65,6 +72,14 @@ message StaticCollectionConfig {
     // a reference to a policy residing / managed in the config block
     // to define the endorsement policy for this collection
     ApplicationPolicy endorsement_policy= 8;
+    // The type of collection.
+    CollectionType type = 9900;
+    // The time after which the collection data expires. For example,
+    // if the value is set to "10m" then the data will be purged
+    // 10 minutes after it was stored. An empty value indicates that
+    // the data should never be purged.
+    // The format of this string must be parseable by time.ParseDuration
+    string TimeToLive = 9901;
 }
 
 
@@ -73,10 +88,9 @@ message StaticCollectionConfig {
 // more general Policy. Instead of containing the actual policy, the
 // configuration may in the future contain a string reference to a policy.
 message CollectionPolicyConfig {
-    option deprecated = true;
     oneof payload {
         // Initially, only a signature policy is supported.
-        SignaturePolicyEnvelope signature_policy = 1;
+        common.SignaturePolicyEnvelope signature_policy = 1;
         // Later, the SignaturePolicy will be replaced by a Policy.
         //        Policy policy = 1;
         // A reference to a Policy is planned to be added later.
