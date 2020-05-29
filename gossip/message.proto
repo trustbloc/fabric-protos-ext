@@ -138,6 +138,12 @@ message GossipMessage {
 
         // Used to respond to collection data requests
         RemoteCollDataResponse collDataRes = 91;
+
+        // Used to request application-specific data
+        AppDataRequest appDataReq = 92;
+
+        // Used to respond to application-specific data requests
+        AppDataResponse appDataRes = 93;
     }
 }
 
@@ -407,4 +413,17 @@ message CollDataElement {
     CollDataDigest digest = 1;
     bytes value = 2;
     google.protobuf.Timestamp expiryTime = 3;
+}
+
+// AppDataRequest message used to request application-specific data
+message AppDataRequest {
+    uint64 nonce = 1;
+    string dataType = 2;
+    bytes request = 3;
+}
+
+// AppDataResponse message used to respond to application-specific data request
+message AppDataResponse {
+    uint64 nonce = 1;
+    bytes response = 2;
 }
